@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgis/postgis:13-3.1
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - ${DATABASE_PORT}:5432
+
+  web:
+    build: .
+    command: bash -c "/wait_for_db.sh ${DATABASE_HOST}:${DATABASE_PORT} -- python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./app:/app
+    ports:
+        - ${SERVICE_PORT}:8000
+    depends_on:
+        - db
+    environment:
+        - DATABASE_URL=postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
