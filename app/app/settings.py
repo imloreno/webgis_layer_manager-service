@@ -102,7 +102,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'geo_db',
         'USER': 'geo_user',
-        'PASSWORD': 'Amadeus1',
+        'PASSWORD': 'TestDB01',
         'HOST': 'db',
         'PORT': '5432',
     }
