@@ -22,7 +22,6 @@ class GeoJsonViewSet(viewsets.ModelViewSet):
         # Setting the default values for the Layer model
         geojson_file = request.FILES['layer_file']
         sorting = request.data.get('sorting')
-        coordinate_system = request.data.get('coordinate_system', 'unknown')
         layer_name = request.data.get('layer_name', 'Unknown')
 
         temp_file = tempfile.NamedTemporaryFile(delete=False)
@@ -37,6 +36,9 @@ class GeoJsonViewSet(viewsets.ModelViewSet):
              # Check if the file is a valid GeoJSON file, if not return an error
             if geojson_data.get("type") != "FeatureCollection":
                 return Response({"error": "Invalid GeoJSON file"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get coordinates
+            coordinate_system = geojson_data.get("crs", {}).get("properties", {}).get("name", "urn:ogc:def:crs:OGC:1.3:CRS84")
 
             # Create a new Layer object
             layer = Layer.objects.create(layer_name=layer_name, sorting=sorting, original_file=geojson_file, coordinate_system=coordinate_system)
@@ -74,6 +76,7 @@ class GeoJsonViewSet(viewsets.ModelViewSet):
         features = layer.features.filter(fk_layers=layer)
 
         geojson = {
+            "id": str(layer.id),
             "type": "FeatureCollection",
             "name": layer.layer_name,
             "crs": {
